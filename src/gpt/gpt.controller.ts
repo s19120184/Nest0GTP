@@ -4,6 +4,7 @@ import { GptService } from './gpt.service';
 import { OrthographyDto } from './dtos';
 import { ProsConsDiscusserDto } from './dtos/prosConsDicusser.dto';
 import { Response } from 'express';
+import { TranslateDto } from './dtos/translate.dto';
 
 @Controller('gpt')
 export class GptController {
@@ -50,6 +51,25 @@ export class GptController {
 
     res.end()
 
+
+  }
+
+  @Post('translate-stream')
+  async translateStream(
+    @Body()translateDto:TranslateDto,
+    @Res()res:Response
+  ){
+    const stream =await this.gptService.translateStream(translateDto)
+
+    res.setHeader('Content-Type', 'application/json')
+    for await ( const chunk of stream){
+      const piece = chunk.choices[0].delta.content || ''
+      res.write(piece)
+
+      console.log(piece)
+    }
+
+    res.end()
 
   }
 
